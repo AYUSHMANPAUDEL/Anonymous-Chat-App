@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat app</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #ecf0f1; /* Soft background color */
+            text-align: center;
+            margin: 20px;
+        }
+
+        h1 {
+            color: #2c3e50; /* Dark gray text color */
+        }
+
+        #chatlog {
+            width: 80%;
+            height: 300px;
+            margin: 10px auto;
+            padding: 10px;
+            resize: none; /* Disable textarea resizing */
+        }
+
+        #chatmsginput {
+            width: 80%;
+            margin-top: 10px;
+            padding: 10px;
+            box-sizing: border-box; /* Include padding in the width */
+            border: 1px solid #bdc3c7; /* Light border color */
+            border-radius: 5px; /* Rounded corners */
+        }
+
+        #chatmsgsubmit {
+            width: 80%;
+            padding: 10px;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px; /* Rounded corners */
+            transition: background-color 0.3s;
+            overflow: hidden;
+        }
+
+        #chatmsgsubmit:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chat with me</h1>
+    <textarea id="chatlog" cols="100" rows="20" readonly></textarea> <br>
+    <input type="text" id="chatmsginput" placeholder="Type your message...">
+    <br>
+    <input type="submit" value="Send" id="chatmsgsubmit" onclick="sendMessage()">
+    <script>
+        var currentURL = window.location.href;
+        var wsURL = currentURL.replace("http", "ws") + "ws/sc/";
+
+        var ws = new WebSocket(wsURL);
+
+        ws.onopen = function () {
+            console.log("WebSocket connection opened");
+        }
+
+        ws.onerror = function (event) {
+            console.log("WebSocket error occurred" , event);
+        }
+
+        ws.onmessage = function (event) {
+            console.log("WebSocket message received", event.data);
+            const data = JSON.parse(event.data);
+            document.querySelector("#chatlog").value += ("Anonymous: " + data.msg + '\n');
+            scrollToBottom();
+        }
+
+        ws.onclose = function (event) {
+            console.log("WebSocket connection closed", event);
+        }
+
+        const sendMessage = () => {
+            const messageInput = document.getElementById("chatmsginput");
+            const message = messageInput.value;
+            if (message.includes("amshu")){
+                alert("mind your language")
+            }
+            else{
+            ws.send(JSON.stringify({
+                'msg': message
+            }));
+            messageInput.value = '';
+            scrollToBottom();
+        }
+        }
+        
+    function scrollToBottom() {
+        const chatlog = document.getElementById("chatlog");
+        chatlog.scrollTop = chatlog.scrollHeight;
+    }
+
+        document.getElementById("chatmsginput").addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+            event.preventDefault(); // Prevent the default behavior of Enter key (form submission)
+            sendMessage(); // Call the sendMessage function when Enter key is pressed
+        }
+    });
+    </script>
+</body>
+</html>
